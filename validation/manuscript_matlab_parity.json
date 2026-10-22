@@ -1,0 +1,69 @@
+{
+  "status": "pass",
+  "generated_utc": "2026-07-26T00:10:27.786185+00:00",
+  "source": {
+    "file_exchange_page": "https://www.mathworks.com/matlabcentral/fileexchange/67665-effort-to-compress-etc-measure-using-non-sequential-recursive-pair-substitution-nsrps",
+    "download_url": "https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/67665/versions/2/download/zip",
+    "file_exchange_version": "1.1.0.0",
+    "published": "2018-06-07",
+    "etc_m_sha256": "56df843924c7fec6866db440461944e1a03a091e987531a178503a970477c1d6",
+    "archive_sha256": "febb805c073ef94d60954b0310e797973a4d21c3ae4aba7a3313eb33369f8210"
+  },
+  "implementations": {
+    "matlab_version": "24.2.0.2923080 (R2024b) Update 6",
+    "c_source_sha256": "613d277719e14fa6be474213f3731678a534705fef1e3478652904c46545fa3c",
+    "c_binary_sha256": "c1b84a32b7609be41269b66fa403fdcb34bfc3c245de9529fb6e7e22cbb3aed5"
+  },
+  "benchmark": {
+    "corpus_sequences": 16607,
+    "timed_repetitions": 3,
+    "cpu": "AMD Ryzen 9 9950X3D 16-Core Processor",
+    "matlab_startup_excluded": true,
+    "matlab_elapsed_seconds": [
+      2.6895048,
+      2.4971803,
+      2.7765556
+    ],
+    "c_elapsed_seconds": [
+      0.04085659998236224,
+      0.032154599961359054,
+      0.037778700003400445
+    ],
+    "matlab_median_seconds": 2.6895048,
+    "c_median_seconds": 0.037778700003400445,
+    "c_speedup_over_matlab": 71.19103621241383
+  },
+  "corpus": {
+    "seed": 20260725,
+    "quick": false,
+    "total_sequences": 16607,
+    "group_counts": {
+      "constant_edge_cases": 3,
+      "exhaustive_k2": 8166,
+      "exhaustive_k3": 8334,
+      "random_grid": 100,
+      "random_long": 4
+    }
+  },
+  "results": {
+    "all_mismatches": 0,
+    "constant_edge_cases": [
+      {
+        "length": 1,
+        "matlab_etc": 0,
+        "c_etc": 0
+      },
+      {
+        "length": 2,
+        "matlab_etc": 0,
+        "c_etc": 0
+      },
+      {
+        "length": 10,
+        "matlab_etc": 0,
+        "c_etc": 0
+      }
+    ],
+    "first_mismatches": []
+  }
+}

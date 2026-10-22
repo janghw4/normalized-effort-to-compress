@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-22",
+  "status": "pass",
+  "platform": "Linux under WSL Ubuntu",
+  "compiler": "GNU C 13.3.0",
+  "python": "3.12",
+  "builds_tested": ["Direct gcc -std=c99 -O3 -fPIC -shared", "CMake 3.28.3 Release"],
+  "oracle_comparisons_per_build": 18180,
+  "mismatches_per_build": 0,
+  "exhaustive_binary_lengths": [1, 12],
+  "exhaustive_ternary_lengths": [1, 8],
+  "random_seed": 20261022,
+  "additional_checks": ["empty and constant sequences", "frequency-one shortcut", "ascending-rank recoding of sparse labels", "invalid pointers and lengths", "integer range rejection", "batch offsets", "normalization and zero denominator"],
+  "not_tested": ["Windows and macOS builds", "forced allocation failure", "public-version speedup over MATLAB"]
+}
