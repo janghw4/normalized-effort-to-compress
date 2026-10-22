@@ -2,7 +2,7 @@
 
 C implementation of Effort-to-Compress (ETC), with a Python wrapper and a helper for reference-based normalization.
 
-ETC counts recursive pair substitutions until a sequence becomes constant. It is not the compressed length or an entropy-rate estimator. The C library computes raw ETC. The Python `normalize` function applies supplied lower and mean anchors for nETC or cETC; it does not generate reference ensembles or estimate their means.
+ETC counts recursive pair substitutions until a sequence becomes constant. The C library computes raw ETC. The Python `normalize` function computes nETC or cETC from a supplied lower bound and reference mean. Reference means must be estimated separately.
 
 ## Build
 
@@ -30,7 +30,9 @@ $env:ETC_LIBRARY = (Resolve-Path build/Release/etc.dll).Path
 python tests/test_etc.py
 ```
 
-On macOS, compile with `cc -std=c99 -O3 -dynamiclib src/etc.c -o build/libetc.dylib` and set `ETC_LIBRARY` to its absolute path. The current release was tested on Linux under WSL. Windows and macOS build instructions have not yet been exercised for this release.
+On macOS, compile with `cc -std=c99 -O3 -dynamiclib src/etc.c -o build/libetc.dylib` and set `ETC_LIBRARY` to its absolute path.
+
+Tested on Linux under WSL. Windows and macOS builds are untested.
 
 ## Python example
 
@@ -48,7 +50,7 @@ print(compute_etc([7, 7, 7]))     # 0: already constant
 print(normalize(etc=5, lower_bound=1, reference_mean=3))  # 2.0
 ```
 
-nETC uses a certified global lower bound and the uniform ensemble mean at the observed length and alphabet size. cETC uses the corresponding anchors conditioned on the ordered symbol-count vector. A reference mean must exceed its lower bound. Values are not clipped to [0, 1]; a value above one means ETC exceeds the chosen reference mean. Do not substitute the upper ceiling L-1 for either reference mean.
+nETC uses a certified global lower bound and the uniform ensemble mean at the observed length and alphabet size. cETC uses the corresponding anchors conditioned on the ordered symbol-count vector. A reference mean must exceed its lower bound. Values above one indicate ETC above the reference mean and are returned without clipping.
 
 ## Deterministic convention
 
@@ -58,9 +60,7 @@ nETC uses a certified global lower bound and the uniform ensemble mean at the ob
 4. Replace all selected occurrences with one fresh label larger than every existing label.
 5. Repeat. If the maximum nonoverlapping frequency is one, add the current length minus one and stop exactly.
 
-The frequency-one shortcut does not apply to every sequence. For example, `[0, 1, 0, 1]` becomes constant after a frequency-two substitution.
-
-The Python wrapper maps integer labels to their ascending ranks. This preserves numerical label order, including for negative or sparse labels. It does not sort the sequence, sort composition counts, or relabel by frequency. Permuting the order of numerical labels can affect tie breaking and ETC.
+The Python wrapper maps integer labels to their ascending ranks while preserving the sequence order and the count associated with each label. Changing numerical label order can affect tie breaking and ETC.
 
 ## C API and limits
 
@@ -72,23 +72,19 @@ void compute_etc_batch(const int *seqs, const int *lengths,
                        int n, int *results);
 ```
 
-`compute_etc` returns a nonnegative count or a negative error code: -1 for invalid input, -2 for allocation failure, and -3 for an unsupported numerical range. A nonempty constant sequence has ETC zero. Empty input returns zero as an API convention, not as a definition of the manuscript's ensembles.
+`compute_etc` returns a nonnegative count or a negative error code: -1 for invalid input, -2 for allocation failure, and -3 for an unsupported numerical range. Constant sequences return zero. The API also returns zero for empty input.
 
-The caller must provide valid buffers of the stated sizes. The batch function expects concatenated sequences and an output array with `n` entries. Raw pointer sizes cannot be checked by this API.
+The caller must provide valid buffers of the stated sizes. The batch function expects concatenated sequences and an output array with `n` entries.
 
-Pair counts use a dense array. Memory grows quadratically with the largest active label, while two sequence buffers use linear memory. Recode sparse input labels to ascending ranks before using the C API directly. The implementation rejects a nonconstant input label span above 46,337 and stops with a range error before its pair-index arithmetic can overflow. Allocation can fail at much smaller sizes. This is not an arbitrary-size or memory-optimal implementation.
+Pair counts use a dense array. Memory grows quadratically with the largest active label, while two sequence buffers use linear memory. Recode sparse input labels to ascending ranks before using the C API directly. The implementation rejects a nonconstant input label span above 46,337 and returns a range error if pair-index arithmetic would overflow. Available memory can impose a lower limit.
 
-## Validation and benchmark
+## Tests
 
 `tests/test_etc.py` compares the library with an independent Python implementation that explicitly counts each candidate pair and does not use the frequency-one shortcut. It exhaustively checks binary sequences through length 12 and ternary sequences through length 8, then checks fixed random and order-preserving sparse-label cases. It also tests edge cases, error returns, batch calls, and normalization.
-
-The manuscript implementation was separately compared with the reference MATLAB implementation on 16,607 sequences with zero mismatches. On an AMD Ryzen 9 9950X3D, median times over three runs were 0.0378 s for C and 2.6895 s for MATLAB (71.2-fold speedup; MATLAB startup excluded). The saved audit is in `validation/manuscript_matlab_parity.json`.
-
-That timing belongs to the manuscript source identified by its SHA-256 in the audit. This public version adds input, allocation, and integer-range checks. It has separate parity tests, but the 71.2-fold timing has not been remeasured for this version. It is not a general speed guarantee.
 
 ## References
 
 - N. Nagaraj, K. Balasubramanian, and S. Dey, “A new complexity measure for time series analysis and classification,” European Physical Journal Special Topics 222, 847–860 (2013).
 - K. Balasubramanian, [Effort-To-Compress (ETC) measure using Non-Sequential Recursive Pair Substitution (NSRPS)](https://www.mathworks.com/matlabcentral/fileexchange/67665-effort-to-compress-etc-measure-using-non-sequential-recursive-pair-substitution-nsrps), MATLAB Central File Exchange, version 1.1.0.0 (2018).
 
-The MATLAB code is not redistributed here. This repository contains the C implementation and supporting Python code under the MIT license. It does not include the manuscript's raw datasets or all analysis pipelines.
+The C implementation and supporting Python code are released under the MIT license. Obtain the reference MATLAB implementation from the link above.
